@@ -14,7 +14,7 @@ import time
 
 
 #Test.py sees if it recognizes the face based on the two images provided here (pic1.jpg, tim.jpeg pictures of eric and tim )
-#It saves images on 2 second intervals if it sees a recognized face 
+#It saves images on 2 second intervals if it sees a recognized face ... only saves for first frame rn for some reason
 video_capture = cv2.VideoCapture(0)
 
 image_first = face_recognition.load_image_file("pic1.jpg")
