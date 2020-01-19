@@ -2,7 +2,8 @@ import face_recognition
 import cv2
 import numpy as np
 import time
-
+import sys
+import os
 import knn
 
 
@@ -16,41 +17,25 @@ video_capture = cv2.VideoCapture(0)
 #    ret, frame = cap.read()
 #    cv2.imshow('Video', frame)
 
-image_first = face_recognition.load_image_file("aaron.jpg")
-image_first_encoding = face_recognition.face_encodings(image_first)[0]
+try:
+    directory = sys.argv[1]
+except IndexError:
+    print('Input directory of input images')
+    exit(0)
 
-# Load a second sample picture and learn how to recognize it.
-image_second = face_recognition.load_image_file("tim.jpeg")
-image_second_encoding = face_recognition.face_encodings(image_second)[0]
+known_face_encodings = []
+known_face_names = []
 
-image_third = face_recognition.load_image_file("eric1.jpg")
-image_third_encoding = face_recognition.face_encodings(image_third)[0]
-
-#image_fourth = face_recognition.load_image_file("mav_white.jpg")
-#print(len(face_recognition.face_encodings(image_fourth)))
-#image_fourth_encoding = face_recognition.face_encodings(image_fourth)[0]
-
-image_fifth = face_recognition.load_image_file("robert.jpg")
-image_fifth_encoding = face_recognition.face_encodings(image_fifth)[0]
-
-
-# Create arrays of known face encodings and their names
-known_face_encodings = [
-    image_first_encoding,
-    image_second_encoding,
-    image_third_encoding,
-#    image_fourth_encoding,
-    image_fifth_encoding
-]
-    
-known_face_names = [
-    "Aaron",
-    "Tim",
-    "Eric",
-#    "Maverick",
-    "Robert"
-    
-]
+for FILE in os.listdir(directory):
+    if FILE[-4:] != '.jpg' and FILE[-5:] != '.jpeg':
+        print('Wrong extension!')
+        continue
+        
+    curr_image = face_recognition.load_image_file(directory+ "/" + FILE)
+    print("Importing image file: " + FILE)
+    curr_encoding = face_recognition.face_encodings(curr_image)[0]
+    known_face_encodings.append(curr_encoding)
+    known_face_names.append(FILE)
 
 output_dict = {}
 
@@ -66,6 +51,7 @@ picture_timer = time.perf_counter()
 
 process_this_frame = True
 i  = 0
+didDishes = False
 while True:
     # Grab a single frame of video
     save_frame = True
@@ -90,6 +76,12 @@ while True:
                 print("Don't see face anymore")
                 face_flag = False
                 face_start = None
+                if didDishes == True:
+                    print(name + " did dishes!")
+                    didDishes = False
+                else:
+                    output_dict[name]['wash_bool'] = False
+                    print(name + " didn't do dishes!")
             else:
                 print("Haven't seen any faces yet")
         
@@ -118,6 +110,7 @@ while True:
                     if time.perf_counter() - face_start >= 5:
                         print("Seen face for over 5 seconds")
                         output_dict[name]['wash_bool'] = True
+                        didDishes = True
                 
                 save_frame = True
             else:
@@ -162,6 +155,13 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+print('Printing output dic: ')
+print(output_dict)
+for key in output_dict:
+    if(output_dict[key]["wash_bool"]):
+        print(key + " did dishes!")
+    else:
+        print(key + " didn't do dishes! Fuck this guy!")
 # Release handle to the webcam
 video_capture.release()
 cv2.destroyAllWindows()
