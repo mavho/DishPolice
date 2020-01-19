@@ -1,12 +1,30 @@
-import face_recognition
+#import face_recognition
 import cv2
 import numpy as np
 import time
-
+import argparse, os, sys
 import knn
 
-
 # This will be where the faces from the video get passed to the ML algorithm
+
+try:
+    directory = sys.argv[1]
+except IndexError:
+    print('Input directory of input images')
+    exit(0)
+
+known_face_encodings = []
+known_face_names = []
+for FILE in os.listdir(directory):
+    if FILE[-4:] != '.jpg':
+        print('Wrong extension!')
+        continue
+        
+    curr_image = face_recognition.load_image_file(FILE)
+    curr_encoding = face_recognition.face_encodings(curr_image)[0]
+    known_face_encodings.append(curr_encoding)
+    known_face_names.append(FILE)
+
 
 video_capture = cv2.VideoCapture(0)
 #addr = "http://169.233.122.23:8081/"
@@ -15,26 +33,6 @@ video_capture = cv2.VideoCapture(0)
 #while True:
 #    ret, frame = cap.read()
 #    cv2.imshow('Video', frame)
-
-image_first = face_recognition.load_image_file("aaron.jpg")
-image_first_encoding = face_recognition.face_encodings(image_first)[0]
-
-# Load a second sample picture and learn how to recognize it.
-image_second = face_recognition.load_image_file("tim.jpeg")
-image_second_encoding = face_recognition.face_encodings(image_second)[0]
-
-# Create arrays of known face encodings and their names
-known_face_encodings = [
-    image_first_encoding,
-    image_second_encoding
-]
-    
-known_face_names = [
-    "Aaron",
-    "First Guy",
-    "Second Guy"
-]
-
 # Initialize some variables
 face_locations = []
 face_encodings = []
