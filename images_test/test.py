@@ -62,10 +62,14 @@ while True:
         face_locations = face_recognition.face_locations(rgb_small_frame)
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
-#        if len(face_locations) == 1 and face_flag == True:
-#            print("Still seeing faces")
-
         face_names = []
+        
+        if len(face_encodings) < 1:
+            if face_flag == True:
+                print("Don't see face anymore")
+                face_flag = False
+                face_start = None
+        
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
@@ -80,24 +84,24 @@ while True:
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
+                        
+#                print("I see a face!!")
+                if face_flag == False:
+                    face_flag = True
+                    face_start = time.perf_counter()
+                    
                 if face_flag == True:
 #                    print("Still see a face!!")
                     if time.perf_counter() - face_start >= 5:
                         print("Seen face for over 5 seconds")
-                        
-                print("I see a face!!")
-                if face_flag == False:
-                    face_flag = True
-                    face_start = time.perf_counter()
                 
                 save_frame = True
                 name = known_face_names[best_match_index]
             else:
                 save_frame = False
-
-            if name == "Unknown":
-                print("Don't see face anymore")
+                
             face_names.append(name)
+
 #        if (i % 5 == 0):
 #            process_this_frame = True
 #        else:
