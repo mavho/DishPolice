@@ -1,4 +1,4 @@
-#import face_recognition
+import face_recognition
 import cv2
 import numpy as np
 import time
@@ -15,15 +15,25 @@ except IndexError:
 
 known_face_encodings = []
 known_face_names = []
+#Dictionary where key is the name of each person (in this case its the image file
+# but it works... ) If value of key is 0, that means they were not detected at all. 
+#1 means they dropped off dishes but havent washed them yet. 2 means they washed dishes
+#assumption i'm making with this code: only one person will be in the frame at a time 
+
+trackDishes = {}
+
 for FILE in os.listdir(directory):
-    if FILE[-4:] != '.jpg':
+    if FILE[-4:] != '.jpg' and FILE[-5:] != '.jpeg':
         print('Wrong extension!')
         continue
         
-    curr_image = face_recognition.load_image_file(FILE)
+    curr_image = face_recognition.load_image_file(directory+ "/" + FILE)
+    print("Importing image file: " + FILE)
     curr_encoding = face_recognition.face_encodings(curr_image)[0]
     known_face_encodings.append(curr_encoding)
     known_face_names.append(FILE)
+    trackDishes[FILE] = 0
+    
 
 
 video_capture = cv2.VideoCapture(0)
@@ -40,9 +50,11 @@ face_names = []
 
 face_flag = False
 face_start = None
-
+didDishes = False 
 process_this_frame = True
 i  = 0
+name = None
+aSwitch = True
 while True:
     # Grab a single frame of video
     save_frame = True
@@ -67,6 +79,13 @@ while True:
                 print("Don't see face anymore")
                 face_flag = False
                 face_start = None
+                print("printing name: " + name)
+                if didDishes == False:
+                    print(name + " didn't do dishes!")
+                else:
+                    print("Name: " + name + " did dishes!")
+            # else: 
+            #     print("Dude dropped off dishes! Get this guyyy")
         
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
@@ -86,12 +105,15 @@ while True:
 #                print("I see a face!!")
                 if face_flag == False:
                     face_flag = True
+                    aSwitch = False
                     face_start = time.perf_counter()
                     
                 if face_flag == True:
 #                    print("Still see a face!!")
-                    if time.perf_counter() - face_start >= 5:
-                        print("Seen face for over 5 seconds")
+                    if time.perf_counter() - face_start >= 7:
+                        print("Seen face for over 7 seconds")
+                        didDishes = True
+
                 
                 save_frame = True
                 name = known_face_names[best_match_index]
