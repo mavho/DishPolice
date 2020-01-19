@@ -33,6 +33,9 @@ image_third_encoding = face_recognition.face_encodings(image_third)[0]
 image_fifth = face_recognition.load_image_file("robert.jpg")
 image_fifth_encoding = face_recognition.face_encodings(image_fifth)[0]
 
+image_sixth = face_recognition.load_image_file("tomas.jpg")
+image_sixth_encoding = face_recognition.face_encodings(image_sixth)[0]
+
 
 # Create arrays of known face encodings and their names
 known_face_encodings = [
@@ -40,7 +43,8 @@ known_face_encodings = [
     image_second_encoding,
     image_third_encoding,
 #    image_fourth_encoding,
-    image_fifth_encoding
+    image_fifth_encoding,
+    image_sixth_encoding
 ]
     
 known_face_names = [
@@ -48,7 +52,8 @@ known_face_names = [
     "Tim",
     "Eric",
 #    "Maverick",
-    "Robert"
+    "Robert",
+    "Tomas"
     
 ]
 
@@ -58,6 +63,8 @@ output_dict = {}
 face_locations = []
 face_encodings = []
 face_names = []
+
+last_seen_face = None
 
 face_flag = False
 face_start = None
@@ -87,11 +94,16 @@ while True:
         
         if len(face_encodings) < 1:
             if face_flag == True:
-                print("Don't see face anymore")
+                print("Last Seen Face: " + last_seen_face)
                 face_flag = False
-                face_start = None
+                timer_end = time.perf_counter() - face_start
+                
+                if timer_end > 30:
+                    output_dict[last_seen_face]['wash_bool'] = True
+                output_dict[last_seen_face]['sink_time'] = timer_end
+#                face_start = None
             else:
-                print("Haven't seen any faces yet")
+                print("No faces right now")
         
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
@@ -110,14 +122,16 @@ while True:
                 if face_flag == False:
                     face_flag = True
                     face_start = time.perf_counter()
+                    last_seen_face = name
                     
                 if face_flag == True:
                     if 'picture' not in output_dict:
-                        pic = cv2.imwrite(str(time.time()) + ".png",frame)
-                        output_dict[name]['picture'] = pic
-                    if time.perf_counter() - face_start >= 5:
-                        print("Seen face for over 5 seconds")
-                        output_dict[name]['wash_bool'] = True
+                        pic_name = name + "_" + str(time.time()) + ".png"
+                        cv2.imwrite(pic_name,frame)
+                        output_dict[name]['picture'] = pic_name
+#                    if time.perf_counter() - face_start >= 5:
+#                        print("Seen face for over 5 seconds")
+#                        output_dict[name]['wash_bool'] = True
                 
                 save_frame = True
             else:
@@ -165,3 +179,5 @@ while True:
 # Release handle to the webcam
 video_capture.release()
 cv2.destroyAllWindows()
+
+print(output_dict)
