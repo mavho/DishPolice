@@ -79,19 +79,13 @@ while True:
                 print("Last Seen Face: " + last_seen_face)
                 face_flag = False
 
-                
+                timer_end = time.perf_counter() - face_start
                 if timer_end > 30:
                     output_dict[last_seen_face]['wash_bool'] = True
                 output_dict[last_seen_face]['sink_time'] = timer_end
 #                face_start = None
                 face_start = None
                 
-                if didDishes == True:
-                    print(name + " did dishes!")
-                    didDishes = False
-                else:
-                    output_dict[name]['wash_bool'] = False
-                    print(name + " didn't do dishes!")
             else:
                 print("No faces right now")
         
@@ -113,13 +107,14 @@ while True:
                     face_flag = True
                     face_start = time.perf_counter()
                     last_seen_face = name
-                    
-                if face_flag == True:
                     if 'picture' not in output_dict:
                         pic_name = name + "_" + str(time.time()) + ".png"
                         cv2.imwrite(pic_name,frame)
                         output_dict[name]['picture'] = pic_name
 
+                    
+#                if face_flag == True:
+                
                 
                 save_frame = True
             else:
@@ -174,5 +169,8 @@ for key in output_dict:
 # Release handle to the webcam
 video_capture.release()
 cv2.destroyAllWindows()
+
+
+#TODO: Make it so dict gets updated even if you quit stream
 
 print(output_dict)
