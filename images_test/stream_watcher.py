@@ -2,7 +2,8 @@ import face_recognition
 import cv2
 import numpy as np
 import time
-
+import sys
+import os
 import knn
 
 
@@ -16,6 +17,7 @@ video_capture = cv2.VideoCapture(0)
 #    ret, frame = cap.read()
 #    cv2.imshow('Video', frame)
 
+<<<<<<< HEAD
 image_first = face_recognition.load_image_file("aaron.jpg")
 image_first_encoding = face_recognition.face_encodings(image_first)[0]
 
@@ -56,6 +58,27 @@ known_face_names = [
     "Tomas"
     
 ]
+=======
+try:
+    directory = sys.argv[1]
+except IndexError:
+    print('Input directory of input images')
+    exit(0)
+
+known_face_encodings = []
+known_face_names = []
+
+for FILE in os.listdir(directory):
+    if FILE[-4:] != '.jpg' and FILE[-5:] != '.jpeg':
+        print('Wrong extension!')
+        continue
+        
+    curr_image = face_recognition.load_image_file(directory+ "/" + FILE)
+    print("Importing image file: " + FILE)
+    curr_encoding = face_recognition.face_encodings(curr_image)[0]
+    known_face_encodings.append(curr_encoding)
+    known_face_names.append(FILE)
+>>>>>>> 00dd620948dbd71441dc6c96a505127e1c541489
 
 output_dict = {}
 
@@ -73,6 +96,7 @@ picture_timer = time.perf_counter()
 
 process_this_frame = True
 i  = 0
+didDishes = False
 while True:
     # Grab a single frame of video
     save_frame = True
@@ -96,12 +120,20 @@ while True:
             if face_flag == True:
                 print("Last Seen Face: " + last_seen_face)
                 face_flag = False
-                timer_end = time.perf_counter() - face_start
+
                 
                 if timer_end > 30:
                     output_dict[last_seen_face]['wash_bool'] = True
                 output_dict[last_seen_face]['sink_time'] = timer_end
 #                face_start = None
+                face_start = None
+                
+                if didDishes == True:
+                    print(name + " did dishes!")
+                    didDishes = False
+                else:
+                    output_dict[name]['wash_bool'] = False
+                    print(name + " didn't do dishes!")
             else:
                 print("No faces right now")
         
@@ -129,9 +161,7 @@ while True:
                         pic_name = name + "_" + str(time.time()) + ".png"
                         cv2.imwrite(pic_name,frame)
                         output_dict[name]['picture'] = pic_name
-#                    if time.perf_counter() - face_start >= 5:
-#                        print("Seen face for over 5 seconds")
-#                        output_dict[name]['wash_bool'] = True
+
                 
                 save_frame = True
             else:
@@ -176,6 +206,13 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+print('Printing output dic: ')
+print(output_dict)
+for key in output_dict:
+    if(output_dict[key]["wash_bool"]):
+        print(key + " did dishes!")
+    else:
+        print(key + " didn't do dishes! Fuck this guy!")
 # Release handle to the webcam
 video_capture.release()
 cv2.destroyAllWindows()
