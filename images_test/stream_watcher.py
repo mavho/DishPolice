@@ -9,10 +9,10 @@ import knn
 
 # This will be where the faces from the video get passed to the ML algorithm
 
-video_capture = cv2.VideoCapture(0)
-#addr = "http://169.233.122.23:8081/"
-#video_capture = cv2.VideoCapture(addr)
-#
+#video_capture = cv2.VideoCapture(0)
+addr = "http://169.233.122.23:8081/"
+video_capture = cv2.VideoCapture(addr)
+
 #while True:
 #    ret, frame = cap.read()
 #    cv2.imshow('Video', frame)
@@ -159,13 +159,13 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-print('Printing output dic: ')
-print(output_dict)
-for key in output_dict:
-    if(output_dict[key]["wash_bool"]):
-        print(key + " did dishes!")
-    else:
-        print(key + " didn't do dishes! Fuck this guy!")
+#print('Printing output dic: ')
+#print(output_dict)
+#for key in output_dict:
+#    if(output_dict[key]["wash_bool"]):
+#        print(key + " did dishes!")
+#    else:
+#        print(key + " didn't do dishes! Fuck this guy!")
 # Release handle to the webcam
 video_capture.release()
 cv2.destroyAllWindows()
