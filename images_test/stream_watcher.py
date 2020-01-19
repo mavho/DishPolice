@@ -29,7 +29,7 @@ known_face_names = []
 
 for FILE in os.listdir(directory):
     if FILE[-4:] != '.jpg' and FILE[-5:] != '.jpeg':
-        print('Wrong extension!')
+        print(FILE + 'has wrong extension!')
         continue
         
     curr_image = face_recognition.load_image_file(directory+ "/" + FILE)
@@ -39,6 +39,11 @@ for FILE in os.listdir(directory):
     known_face_names.append(FILE)
 
 output_dict = {}
+#Initialize dictionary that tracks people doing dishes 
+for key in known_face_names:
+    output_dict[key] = {}
+    output_dict[key]['wash_bool'] = False 
+    output_dict[key]['droppedOffDishes'] = False 
 
 # Initialize some variables
 face_locations = []
@@ -82,8 +87,12 @@ while True:
                 timer_end = time.perf_counter() - face_start
                 if timer_end > 30:
                     output_dict[last_seen_face]['wash_bool'] = True
+                    output_dict[last_seen_face]['droppedOffDishes'] = False
+                #means he didn't do dishes
+                else:
+                    output_dict[last_seen_face]['droppedOffDishes'] = True
+                    output_dict[last_seen_face]['wash_bool'] = False
                 output_dict[last_seen_face]['sink_time'] = timer_end
-#                face_start = None
                 face_start = None
                 
             else:
@@ -166,6 +175,12 @@ while True:
 #        print(key + " did dishes!")
 #    else:
 #        print(key + " didn't do dishes! Fuck this guy!")
+print('Printing output dic: ')
+print(output_dict)
+#only prints out people who didn't do dishes, could also add who did dishes? 
+for key in output_dict:
+    if(output_dict[key]["droppedOffDishes"] and not output_dict[key]["wash_bool"]):
+        print(key + " didn't do dishes!")
 # Release handle to the webcam
 video_capture.release()
 cv2.destroyAllWindows()
@@ -173,4 +188,3 @@ cv2.destroyAllWindows()
 
 #TODO: Make it so dict gets updated even if you quit stream
 
-print(output_dict)
