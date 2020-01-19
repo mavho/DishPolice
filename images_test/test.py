@@ -3,21 +3,20 @@ import cv2
 import numpy as np
 import time
 
-# This is a demo of running face recognition on live video from your webcam. It's a little more complicated than the
-# other example, but it includes some basic performance tweaks to make things run a lot faster:
-#   1. Process each video frame at 1/4 resolution (though still display it at full resolution)
-#   2. Only detect faces in every other frame of video.
-
-# PLEASE NOTE: This example requires OpenCV (the `cv2` library) to be installed only to read from your webcam.
-# OpenCV is *not* required to use the face_recognition library. It's only required if you want to run this
-# specific demo. If you have trouble installing it, try any of the other demos that don't require it instead.
+import knn
 
 
-#Test.py sees if it recognizes the face based on the two images provided here (pic1.jpg, tim.jpeg pictures of eric and tim )
-#It saves images on 2 second intervals if it sees a recognized face ... only saves for first frame rn for some reason
+# This will be where the faces from the video get passed to the ML algorithm
+
 video_capture = cv2.VideoCapture(0)
+#addr = "http://169.233.122.23:8081/"
+#video_capture = cv2.VideoCapture(addr)
+#
+#while True:
+#    ret, frame = cap.read()
+#    cv2.imshow('Video', frame)
 
-image_first = face_recognition.load_image_file("pic1.jpg")
+image_first = face_recognition.load_image_file("aaron.jpg")
 image_first_encoding = face_recognition.face_encodings(image_first)[0]
 
 # Load a second sample picture and learn how to recognize it.
@@ -29,7 +28,9 @@ known_face_encodings = [
     image_first_encoding,
     image_second_encoding
 ]
+    
 known_face_names = [
+    "Aaron",
     "First Guy",
     "Second Guy"
 ]
@@ -38,11 +39,15 @@ known_face_names = [
 face_locations = []
 face_encodings = []
 face_names = []
+
+face_flag = False
+face_start = None
+
 process_this_frame = True
 i  = 0
 while True:
     # Grab a single frame of video
-    save_frame = False
+    save_frame = True
     ret, frame = video_capture.read()
 
     # Resize frame of video to 1/4 size for faster face recognition processing
@@ -53,9 +58,12 @@ while True:
 
     # Only process every other frame of video to save time
     if process_this_frame:
-        # Find all the faces and face encodings in the current frame of video
+#        # Find all the faces and face encodings in the current frame of video
         face_locations = face_recognition.face_locations(rgb_small_frame)
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+
+#        if len(face_locations) == 1 and face_flag == True:
+#            print("Still seeing faces")
 
         face_names = []
         for face_encoding in face_encodings:
@@ -72,18 +80,30 @@ while True:
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
+                if face_flag == True:
+#                    print("Still see a face!!")
+                    if time.perf_counter() - face_start >= 5:
+                        print("Seen face for over 5 seconds")
+                        
+                print("I see a face!!")
+                if face_flag == False:
+                    face_flag = True
+                    face_start = time.perf_counter()
+                
                 save_frame = True
                 name = known_face_names[best_match_index]
             else:
                 save_frame = False
 
+            if name == "Unknown":
+                print("Don't see face anymore")
             face_names.append(name)
-    if (i % 5 == 0):
-        process_this_frame = True
-    else:
-        process_this_frame = False
-    i = i + 1 
-    print("i = " + str(i), file=open("output.txt", "a"))
+#        if (i % 5 == 0):
+#            process_this_frame = True
+#        else:
+#            process_this_frame = False
+#        i = i + 1 
+#    print("i = " + str(i), file=open("output.txt", "a"))
     # Display the results
     for (top, right, bottom, left), name in zip(face_locations, face_names):
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
@@ -100,12 +120,12 @@ while True:
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
-    # Display the resulting image
+#     Display the resulting image
     cv2.imshow('Video', frame)
     ts = str(time.time())
     #image file is saved with timestamp 
-    if process_this_frame and save_frame:
-        cv2.imwrite(ts + ".png",frame)
+#    if process_this_frame and save_frame:
+#        cv2.imwrite(ts + ".png",frame)
     # Hit 'q' on the keyboard to quit!
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
