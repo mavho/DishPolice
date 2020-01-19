@@ -17,48 +17,7 @@ video_capture = cv2.VideoCapture(0)
 #    ret, frame = cap.read()
 #    cv2.imshow('Video', frame)
 
-<<<<<<< HEAD
-image_first = face_recognition.load_image_file("aaron.jpg")
-image_first_encoding = face_recognition.face_encodings(image_first)[0]
 
-# Load a second sample picture and learn how to recognize it.
-image_second = face_recognition.load_image_file("tim.jpeg")
-image_second_encoding = face_recognition.face_encodings(image_second)[0]
-
-image_third = face_recognition.load_image_file("eric1.jpg")
-image_third_encoding = face_recognition.face_encodings(image_third)[0]
-
-#image_fourth = face_recognition.load_image_file("mav_white.jpg")
-#print(len(face_recognition.face_encodings(image_fourth)))
-#image_fourth_encoding = face_recognition.face_encodings(image_fourth)[0]
-
-image_fifth = face_recognition.load_image_file("robert.jpg")
-image_fifth_encoding = face_recognition.face_encodings(image_fifth)[0]
-
-image_sixth = face_recognition.load_image_file("tomas.jpg")
-image_sixth_encoding = face_recognition.face_encodings(image_sixth)[0]
-
-
-# Create arrays of known face encodings and their names
-known_face_encodings = [
-    image_first_encoding,
-    image_second_encoding,
-    image_third_encoding,
-#    image_fourth_encoding,
-    image_fifth_encoding,
-    image_sixth_encoding
-]
-    
-known_face_names = [
-    "Aaron",
-    "Tim",
-    "Eric",
-#    "Maverick",
-    "Robert",
-    "Tomas"
-    
-]
-=======
 try:
     directory = sys.argv[1]
 except IndexError:
@@ -78,7 +37,6 @@ for FILE in os.listdir(directory):
     curr_encoding = face_recognition.face_encodings(curr_image)[0]
     known_face_encodings.append(curr_encoding)
     known_face_names.append(FILE)
->>>>>>> 00dd620948dbd71441dc6c96a505127e1c541489
 
 output_dict = {}
 
